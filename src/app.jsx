@@ -7,10 +7,17 @@ import ListScenes from './components/scenes/list';
 import SceneDetails from './components/scenes/details';
 import MapView from './components/mapview';
 
-import { setError } from './actions/scenes';
+import { setError, addSceneFromIndex } from './actions/scenes';
+
+import io from 'socket.io-client';
 
 const mapStateToProps = ({ scenes, main }) => ({ scenes, ...main });
-const mapDispatchToProps = { setError };
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addSceneFromIndex: (...args) => dispatch(addSceneFromIndex(...args)),
+    setError: (...args) => dispatch(setError(...args)),
+  };
+};
 
 class ConnectedApp extends Component {
   constructor() {
@@ -25,6 +32,33 @@ class ConnectedApp extends Component {
 
   handleSceneShowClicked(id = null) {
     this.setState({ currentSceneId: id });
+  }
+
+  componentDidMount() {
+    const pathName = window.location.pathname;
+    // UUID regex
+    const sessionRe = /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i;
+    const matches = sessionRe.exec(pathName);
+
+    if (matches) {
+      const sessionId = matches[0];
+      console.log(`determined session id ${sessionId}`);
+      const socket = io();
+      socket.emit('session', sessionId);
+      console.log('initialized socket, ', socket);
+
+      socket.on('map', (msg) => {
+        const msgobj = JSON.parse(msg);
+        console.log(msgobj);
+
+        if (msgobj.command === 'update') {
+          const urlToGeotiff = msgobj.data;
+          this.props.addSceneFromIndex(urlToGeotiff);
+        }
+      });
+    } else {
+      console.log(`could not determine session id from ${pathName}`);
+    }
   }
 
   render() {
@@ -51,12 +85,8 @@ class ConnectedApp extends Component {
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
           <div className="container-fluid">
             <div className="navbar-header">
-              <a className="navbar-brand" href="https://eox.at/" target="_blank" rel="noopener noreferrer">
-                <img alt="" src="images/EOX_Logo_white.svg" />
-              </a>
-
               <span className="navbar-brand" style={{ color: 'white' }}>
-                COG-Explorer
+                Syncarto
               </span>
               {
                 errorMessage &&

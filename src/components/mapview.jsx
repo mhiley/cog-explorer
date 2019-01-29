@@ -7,7 +7,7 @@ import 'ol/ol.css';
 import Map from 'ol/map';
 import View from 'ol/view';
 import TileLayer from 'ol/layer/tile';
-import TileWMS from 'ol/source/tilewms';
+import XYZ from 'ol/source/XYZ.js';
 import TileGrid from 'ol/tilegrid/tilegrid';
 import proj from 'ol/proj';
 import extent from 'ol/extent';
@@ -46,13 +46,9 @@ class MapView extends Component {
       layers: [
         new TileLayer({
           extent: [-180, -90, 180, 90],
-          source: new TileWMS({
-            url: 'https://tiles.maps.eox.at/wms',
-            params: { LAYERS: 's2cloudless' },
-            projection: 'EPSG:4326',
-            attributions: [
-              '<a xmlns: dct="http://purl.org/dc/terms/" href="https://s2maps.eu" property="dct:title">Sentinel-2 cloudless - https://s2maps.eu</a> by <a xmlns:cc="http://creativecommons.org/ns#" href="https://eox.at" property="cc:attributionName" rel="cc:attributionURL">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016 &amp; 2017)',
-            ],
+          source: new XYZ({
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            attributions: ['Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'],
           }),
         }),
       ],
