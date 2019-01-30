@@ -157,7 +157,7 @@ export function addSceneFromIndex(url, attribution, pipeline) {
           blue = 0;
         }
 
-        const isRGB = true;
+        const isRGB = false;
 
         dispatch(addScene(url, bands, red, green, blue, true, false, isRGB, attribution, pipeline));
       }

@@ -303,8 +303,26 @@ class MapView extends Component {
 
       console.time(`rendering ${sceneId + z + x + y}`);
       const [red, green, blue] = data;
+
+      // mjh trying to get colorscale proof of concept to work
+      // before implementing this more formally
+      const redScaled = new Uint8Array(red.length);
+      const greenScaled = new Uint8Array(green.length);
+      const blueScaled = new Uint8Array(blue.length);
+      const min = -0.2; // TODO get these from socket.io msg
+      const max = 0.7;
+      for (let i = 0; i < red.length; i++) {
+        redScaled[i] = ((red[i] - min) / (max - min)) * 255;
+      }
+      for (let i = 0; i < green.length; i++) {
+        greenScaled[i] = 255 - (((green[i] - min) / (max - min)) * 255);
+      }
+      for (let i = 0; i < blue.length; i++) {
+        blueScaled[i] = 0;
+      }
+
       // const [red, green, blue] = [redArr, greenArr, blueArr].map(arr => arr[0]);
-      renderData(canvas, scene.pipeline, width, height, red, green, blue, false);
+      renderData(canvas, scene.pipeline, width, height, redScaled, greenScaled, blueScaled, false);
       console.timeEnd(`rendering ${sceneId + z + x + y}`);
     } else {
       const [redImage, greenImage, blueImage] = await all([
