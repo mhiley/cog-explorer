@@ -85,13 +85,17 @@ export function addSceneFromIndex(url, attribution, pipeline) {
     dispatch(startLoading());
     try {
       // find out type of data the URL is pointing to
-      const headerResponse = await fetch(url, { method: 'HEAD' });
+      // const headerResponse = await fetch(url, { method: 'HEAD' });
 
-      if (!headerResponse.ok) {
-        throw new Error(`Failed to fetch ${url}`);
-      }
+      // if (!headerResponse.ok) {
+      //   throw new Error(`Failed to fetch ${url}`);
+      // }
 
-      const contentType = headerResponse.headers.get('content-type');
+      // const contentType = headerResponse.headers.get('content-type');
+      
+      // mjh hardcode contentType for now due to 403 Forbidden when 
+      // doing HEAD request on a signed s3 url
+      const contentType = 'image/tiff';
 
       if (contentType === 'text/html') {
         const relUrl = url.endsWith('/') ? url : url.substring(0, url.lastIndexOf('/'));
@@ -143,7 +147,7 @@ export function addSceneFromIndex(url, attribution, pipeline) {
         }
 
         let [red, green, blue] = [];
-        if (samples === 3 || typeof image.fileDirectory.PhotometricInterpretation !== 'undefined') {
+        if (false) {
           red = 0;
           green = 1;
           blue = 2;
@@ -153,10 +157,7 @@ export function addSceneFromIndex(url, attribution, pipeline) {
           blue = 0;
         }
 
-        const isRGB = (
-          typeof image.fileDirectory.PhotometricInterpretation !== 'undefined'
-          && image.getSampleByteSize(0) === 1
-        );
+        const isRGB = true;
 
         dispatch(addScene(url, bands, red, green, blue, true, false, isRGB, attribution, pipeline));
       }

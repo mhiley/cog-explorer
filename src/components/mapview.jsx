@@ -190,10 +190,14 @@ class MapView extends Component {
 
     // proj setup?
 
-    const epsg = `EPSG:${first.geoKeys.ProjectedCSTypeGeoKey}`;
+    let epsgCode = first.geoKeys.ProjectedCSTypeGeoKey;
+    if (!epsgCode) {
+      epsgCode = first.geoKeys.GeographicTypeGeoKey;
+    }
+    const epsg = `EPSG:${epsgCode}`;
 
     if (!proj4.defs(epsg)) {
-      const response = await fetch(`//epsg.io/${first.geoKeys.ProjectedCSTypeGeoKey}.proj4`);
+      const response = await fetch(`//epsg.io/${epsgCode}.proj4`);
       proj4.defs(epsg, await response.text());
     }
 
