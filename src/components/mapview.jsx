@@ -26,6 +26,7 @@ class CogAdapter {
     this.sceneSources = {};
     this.tileCache = {};
     this.renderedTileCache = {};
+    this.scenes = [];
 
     this.pool = new Pool();
   }
@@ -79,6 +80,7 @@ class CogAdapter {
 
   async addSceneLayer(scene) {
     console.log('scene: ', scene);
+    this.scenes.push(scene);
     this.sceneSources[scene.id] = {
       [scene.redBand]: this.getImage(scene.id, scene.bands.get(scene.redBand), scene.hasOvr),
       [scene.greenBand]: this.getImage(scene.id, scene.bands.get(scene.greenBand), scene.hasOvr),
@@ -132,7 +134,7 @@ class CogAdapter {
     this.sceneLayers[scene.id] = layer;
 
     const view = this.map.getView();
-    console.log('proj.transformExtent args: ', first.getBoundingBox(), epsg, this.map.getView().getProjection());
+
     const lonLatExtent = proj.transformExtent(
       first.getBoundingBox(), epsg, this.map.getView().getProjection(),
     );
@@ -146,13 +148,6 @@ class CogAdapter {
         },
       );
     }
-
-    const source = layer.getSource();
-    this.progressBar.setSource(source);
-
-    source.on('tileloadstart', this.props.tileStartLoading);
-    source.on('tileloadend', this.props.tileStopLoading);
-    source.on('tileloaderror', this.props.tileStopLoading);
   }
 
   async renderTile(sceneId, canvas, z, x, y) {
@@ -169,7 +164,7 @@ class CogAdapter {
   }
 
   async renderTileInternal(sceneId, canvas, z, x, y) {
-    const scene = this.props.scenes.find(s => s.id === sceneId);
+    const scene = this.scenes.find(s => s.id === sceneId);
 
     if (!scene) {
       return;
