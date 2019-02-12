@@ -1,118 +1,33 @@
-import React, { Component, createRef } from 'react';
-import { connect } from 'react-redux';
-
 import proj4 from 'proj4';
 
 import 'ol/ol.css';
-import Map from 'ol/map';
-import View from 'ol/view';
 import TileLayer from 'ol/layer/tile';
-import XYZ from 'ol/source/XYZ.js';
 import TileGrid from 'ol/tilegrid/tilegrid';
 import proj from 'ol/proj';
 import extent from 'ol/extent';
 
 import { fromUrl, fromUrls, Pool } from 'geotiff';
 
-import CanvasTileImageSource, { ProgressBar } from '../maputil';
+import CanvasTileImageSource from '../maputil';
 import { renderData } from '../renderutils';
-
-import { tileStartLoading, tileStopLoading, setPosition } from '../actions/main';
 
 
 proj.setProj4(proj4);
 
 async function all(promises) {
-  return await Promise.all(promises);
+  const result = await Promise.all(promises);
+  return result;
 }
 
-const mapStateToProps = ({ scenes, main }) => {
-  return { scenes, longitude: main.longitude, latitude: main.latitude, zoom: main.zoom };
-};
-
-const mapDispatchToProps = {
-  tileStartLoading,
-  tileStopLoading,
-  setPosition,
-};
-
-class MapView extends Component {
-  constructor() {
-    super();
-    this.mapRef = createRef();
-    this.progressBarRef = createRef();
-
-    this.map = new Map({
-      layers: [
-        new TileLayer({
-          extent: [-180, -90, 180, 90],
-          source: new XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            attributions: ['Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'],
-          }),
-        }),
-      ],
-      view: new View({
-        projection: 'EPSG:4326',
-        center: [0, 0],
-        zoom: 5,
-        // maxZoom: 13,
-        minZoom: 3,
-        maxZoom: 23,
-      }),
-    });
+class CogAdapter {
+  constructor(olMapInstance) {
+    this.map = olMapInstance;
     this.sceneLayers = {};
     this.sceneSources = {};
     this.tileCache = {};
     this.renderedTileCache = {};
 
-    this.progressBar = new ProgressBar();
-
-    this.map.on('moveend', () => {
-      const view = this.map.getView();
-      this.props.setPosition(...view.getCenter(), view.getZoom());
-    });
-
     this.pool = new Pool();
-  }
-
-  componentDidMount() {
-    this.map.setTarget(this.mapRef.current);
-    this.progressBar.setElement(this.progressBarRef.current);
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { scenes: prevScenes } = prevProps;
-    const { scenes } = this.props;
-
-    if (prevScenes.length > scenes.length) {
-      // TODO find scene and remove layer
-      const removedScene = prevScenes.find(scene => scenes.indexOf(scene) === -1);
-      delete this.renderedTileCache[removedScene.id];
-      this.map.removeLayer(this.sceneLayers[removedScene.id]);
-    } else if (prevScenes.length < scenes.length) {
-      this.addSceneLayer(scenes[scenes.length - 1]);
-    } else {
-      const changedScene = scenes.find((scene, index) => scene !== prevScenes[index]);
-
-      if (changedScene) {
-        delete this.renderedTileCache[changedScene.id];
-
-        const layer = this.sceneLayers[changedScene.id];
-        if (layer) {
-          const source = layer.getSource();
-          // refresh the source cache
-          source.setTileUrlFunction(
-            source.getTileUrlFunction(),
-            (new Date()).getTime(),
-          );
-        }
-      }
-    }
-  }
-
-  componentWillUnmount() {
-    this.map.setTarget(null);
   }
 
   async getImage(sceneId, url, hasOvr = true) {
@@ -163,6 +78,7 @@ class MapView extends Component {
   }
 
   async addSceneLayer(scene) {
+    console.log('scene: ', scene);
     this.sceneSources[scene.id] = {
       [scene.redBand]: this.getImage(scene.id, scene.bands.get(scene.redBand), scene.hasOvr),
       [scene.greenBand]: this.getImage(scene.id, scene.bands.get(scene.greenBand), scene.hasOvr),
@@ -176,11 +92,13 @@ class MapView extends Component {
     for (let i = 0; i < count; ++i) {
       images.push(await tiff.getImage(i));
     }
+    console.log('images: ', images);
 
     const first = images[0];
     const resolutions = images.map((image => image.getResolution(first)[0]));
     const tileSizes = images.map((image => [image.getTileWidth(), image.getTileHeight()]));
 
+    console.log('resolutions: ', resolutions);
     const tileGrid = new TileGrid({
       extent: first.getBoundingBox(),
       origin: [first.getOrigin()[0], first.getBoundingBox()[1]],
@@ -214,6 +132,7 @@ class MapView extends Component {
     this.sceneLayers[scene.id] = layer;
 
     const view = this.map.getView();
+    console.log('proj.transformExtent args: ', first.getBoundingBox(), epsg, this.map.getView().getProjection());
     const lonLatExtent = proj.transformExtent(
       first.getBoundingBox(), epsg, this.map.getView().getProjection(),
     );
@@ -349,18 +268,6 @@ class MapView extends Component {
       console.timeEnd(`rendering ${sceneId + z + x + y}`);
     }
   }
-
-  render() {
-    const { longitude, latitude, zoom } = this.props;
-    this.map.getView().setCenter([longitude, latitude]);
-    this.map.getView().setZoom(zoom);
-    return (
-      <div ref={this.mapRef}>
-        <div ref={this.progressBarRef} className="map-progress-bar" />
-      </div>
-    );
-  }
 }
 
-const ConnectedMapView = connect(mapStateToProps, mapDispatchToProps)(MapView);
-export default ConnectedMapView;
+export default CogAdapter;

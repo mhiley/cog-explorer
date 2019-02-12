@@ -1,11 +1,19 @@
 const path = require('path');
 
 module.exports = {
-  entry: ['babel-polyfill', './src/index.jsx'],
+  entry: {
+    CogAdapter: ['babel-polyfill', './src/index.jsx'],
+  },
 
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'app.bundle.js',
+
+    // mjh this allows "CogAdapter" variable in global context for use w/o import
+    // following http://siawyoung.com/coding/javascript/exporting-es6-modules-as-single-scripts-with-webpack.html
+    libraryTarget: 'var',
+    // `library` determines the name of the global variable
+    library: '[name]',
   },
 
   module: {
