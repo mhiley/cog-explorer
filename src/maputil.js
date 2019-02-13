@@ -1,6 +1,9 @@
-import Tile from 'ol/tile';
-import TileImageSource from 'ol/source/tileimage';
-import TileState from 'ol/tilestate';
+// TODO currently assuming ol object is available on window via <script> tag
+//      should figure out proper way to do this using webpack externals or vendor bundle
+//      .. or something
+const Tile = window.ol.Tile;
+const TileImageSource = window.ol.source.TileImage;
+const TileState = window.ol.TileState;
 
 
 class CanvasTile extends Tile {

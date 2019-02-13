@@ -3,20 +3,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>COG-Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol-debug.css" type="text/css">
   </head>
   <body>
 
     <div id="map">
     </div>
 
-    <script src="app.bundle.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol-debug.js"></script>
+    <script src="app.bundle.js"></script>
 
     <script type="text/javascript">
       $(window).on('load', function () {
         var map = CogAdapter.createMap("map");
         var adapter = new CogAdapter.CogAdapter(map);
-        var sceneId = 'https://syncarto-hiley-local.s3.amazonaws.com/5de9a878-34b6-4631-8244-5425fb9871d6/USER_EXP_979d10c8d17b45625b6faae5f96be609_COG.TIF?AWSAccessKeyId=AKIAJVS7YCUAOBLEXNPQ&Expires=1550006301&Signature=Eh6%2FqYc%2F5m3BimQhWvST1UOzays%3D';
+        var sceneId = 'https://syncarto-hiley-local.s3.amazonaws.com/24208163-f1b6-4d05-893e-147286a8be24/USER_EXP_979d10c8d17b45625b6faae5f96be609_COG.TIF?AWSAccessKeyId=AKIAJVS7YCUAOBLEXNPQ&Expires=1550092141&Signature=rgH0Zu7AOO2w1ovlAOAVLHwLu4w%3D';
         var samples = 1;
         var bands = new Map();
         for (var i = 0; i < samples; ++i) {

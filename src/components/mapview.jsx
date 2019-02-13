@@ -1,10 +1,12 @@
 import proj4 from 'proj4';
 
-import 'ol/ol.css';
-import TileLayer from 'ol/layer/tile';
-import TileGrid from 'ol/tilegrid/tilegrid';
-import proj from 'ol/proj';
-import extent from 'ol/extent';
+// TODO currently assuming ol object is available on window via <script> tag
+//      should figure out proper way to do this using webpack externals or vendor bundle
+//      .. or something
+const TileLayer = window.ol.layer.Tile;
+const TileGrid = window.ol.tilegrid.TileGrid;
+const proj = window.ol.proj;
+const extent = window.ol.extent;
 
 import { fromUrl, fromUrls, Pool } from 'geotiff';
 
