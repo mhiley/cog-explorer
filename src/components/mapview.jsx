@@ -228,10 +228,22 @@ class CogAdapter {
       const min = -0.2; // TODO get these from socket.io msg
       const max = 0.7;
       for (let i = 0; i < red.length; i++) {
-        redScaled[i] = ((red[i] - min) / (max - min)) * 255;
+        redScaled[i] = 255 - (((red[i] - min) / (max - min)) * 255);
+	    if (red[i] < min) {
+		  redScaled[i] = 255;
+		}
+	    if (red[i] > max) {
+		  redScaled[i] = 0;
+		}
       }
       for (let i = 0; i < green.length; i++) {
-        greenScaled[i] = 255 - (((green[i] - min) / (max - min)) * 255);
+        greenScaled[i] = ((green[i] - min) / (max - min)) * 255;
+	    if (green[i] < min) {
+		  greenScaled[i] = 0;
+		}
+	    if (green[i] > max) {
+		  greenScaled[i] = 255;
+		}
       }
       for (let i = 0; i < blue.length; i++) {
         blueScaled[i] = 0;
