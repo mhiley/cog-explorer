@@ -1,12 +1,10 @@
 import proj4 from 'proj4';
 
-// TODO currently assuming ol object is available on window via <script> tag
-//      should figure out proper way to do this using webpack externals or vendor bundle
-//      .. or something
-const TileLayer = window.ol.layer.Tile;
-const TileGrid = window.ol.tilegrid.TileGrid;
-const proj = window.ol.proj;
-const extent = window.ol.extent;
+import { Tile as TileLayer } from 'ol/layer';
+import TileGrid from 'ol/tilegrid/TileGrid';
+import { transformExtent } from 'ol/proj';
+import { register as registerProj4 } from 'ol/proj/proj4';
+import { containsCoordinate } from 'ol/extent';
 
 import { fromUrl, fromUrls, Pool } from 'geotiff';
 
@@ -14,7 +12,7 @@ import CanvasTileImageSource from '../maputil';
 import { renderData } from '../renderutils';
 
 
-proj.setProj4(proj4);
+registerProj4(proj4);
 
 async function all(promises) {
   const result = await Promise.all(promises);
@@ -121,6 +119,7 @@ class CogAdapter {
     if (!proj4.defs(epsg)) {
       const response = await fetch(`//epsg.io/${epsgCode}.proj4`);
       proj4.defs(epsg, await response.text());
+      registerProj4(proj4); // per https://openlayers.org/en/latest/apidoc/module-ol_proj_proj4.html
     }
 
     const layer = new TileLayer({
@@ -137,12 +136,12 @@ class CogAdapter {
 
     const view = this.map.getView();
 
-    const lonLatExtent = proj.transformExtent(
+    const lonLatExtent = transformExtent(
       first.getBoundingBox(), epsg, this.map.getView().getProjection(),
     );
 
     // only animate to new bounds when center is not already inside image
-    if (!extent.containsCoordinate(lonLatExtent, view.getCenter())) {
+    if (!containsCoordinate(lonLatExtent, view.getCenter())) {
       view.fit(
         lonLatExtent, {
           duration: 1000,
