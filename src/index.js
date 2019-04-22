@@ -30,9 +30,4 @@ const createMap = (targetId) => {
   return map;
 };
 
-module.exports = {
-  CogAdapter,
-  createMap,
-};
-
 export default CogAdapter;
