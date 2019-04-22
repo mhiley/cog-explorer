@@ -34,3 +34,5 @@ module.exports = {
   CogAdapter,
   createMap,
 };
+
+export default CogAdapter;
