@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    CogAdapter: ['babel-polyfill', './src/index.jsx'],
+    CogAdapter: ['babel-polyfill', './src/index.js'],
   },
 
   output: {
