@@ -1,4 +1,4 @@
-import { Tile } from 'ol/layer';
+import Tile from 'ol/Tile';
 import TileImageSource from 'ol/source/TileImage';
 import TileState from 'ol/TileState';
 

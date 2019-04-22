@@ -1,6 +1,6 @@
 import proj4 from 'proj4';
 
-import { Tile as TileLayer } from 'ol/layer';
+import TileLayer from 'ol/layer/Tile';
 import TileGrid from 'ol/tilegrid/TileGrid';
 import { transformExtent } from 'ol/proj';
 import { register as registerProj4 } from 'ol/proj/proj4';
@@ -145,7 +145,7 @@ class CogAdapter {
       view.fit(
         lonLatExtent, {
           duration: 1000,
-          padding: [0, this.map.getSize()[0] / 2, 0, 0],
+          padding: [0, 0, 0, 0],
         },
       );
     }
