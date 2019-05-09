@@ -234,6 +234,11 @@ class CogAdapter {
 	    if (red[i] > max) {
 		  redScaled[i] = 0;
 		}
+	    if (red[i] == 0) {
+          // Problem is 0 (nodata/fill) is also valid NDVI value.
+          // Pixels with r,g,b all equal to zero will be discarded (see webglrenderer frag shader)
+		  redScaled[i] = 0;
+		}
       }
       for (let i = 0; i < green.length; i++) {
         greenScaled[i] = ((green[i] - min) / (max - min)) * 255;
@@ -242,6 +247,9 @@ class CogAdapter {
 		}
 	    if (green[i] > max) {
 		  greenScaled[i] = 255;
+		}
+	    if (green[i] == 0) {
+		  greenScaled[i] = 0;
 		}
       }
       for (let i = 0; i < blue.length; i++) {
