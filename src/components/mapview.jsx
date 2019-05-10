@@ -13,6 +13,7 @@ import { fromUrl, fromUrls, Pool } from 'geotiff';
 import CanvasTileImageSource from '../maputil';
 import { renderData } from '../renderutils';
 
+const FILL_VALUE = -999;
 
 proj.setProj4(proj4);
 
@@ -73,6 +74,7 @@ class CogAdapter {
           window: wnd,
           samples,
           pool: image.fileDirectory.Compression === 5 ? this.pool : null,
+          fillValue: FILL_VALUE,
         });
       }
     }
@@ -235,9 +237,11 @@ class CogAdapter {
 	    if (red[i] > max) {
 		  redScaled[i] = 0;
 		}
-	    if (red[i] == 0) {
+	    if (red[i] == FILL_VALUE || red[i] == 0) {
+          // There's an issue with the readRasters fillValue implementation -
+          // sometimes it still return 0 instead of FILL_VALUE.
           // Problem is 0 (nodata/fill) is also valid NDVI value.
-          // Pixels with r,g,b all equal to zero will be discarded (see webglrenderer frag shader)
+          // Note, Pixels with r,g,b all equal to zero will be discarded (see webglrenderer frag shader).
 		  redScaled[i] = 0;
 		}
       }
@@ -249,12 +253,15 @@ class CogAdapter {
 	    if (green[i] > max) {
 		  greenScaled[i] = 255;
 		}
-	    if (green[i] == 0) {
+	    if (green[i] == FILL_VALUE || green[i] == 0) {
 		  greenScaled[i] = 0;
 		}
       }
       for (let i = 0; i < blue.length; i++) {
         blueScaled[i] = 0;
+	    if (blue[i] == FILL_VALUE || blue[i] == 0) {
+		  blueScaled[i] = 0;
+		}
       }
 
       // const [red, green, blue] = [redArr, greenArr, blueArr].map(arr => arr[0]);
