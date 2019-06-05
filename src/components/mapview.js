@@ -6,7 +6,12 @@ import { transformExtent } from 'ol/proj';
 import { register as registerProj4 } from 'ol/proj/proj4';
 import { containsCoordinate } from 'ol/extent';
 
-import { fromUrl, fromUrls, Pool } from 'geotiff';
+// import { fromUrl, fromUrls, Pool } from 'geotiff';
+// for stencil/typescript/rollup build, importing geotiff.js this way
+// avoids lots of issues.
+// inpsired by https://github.com/geotiffjs/geotiff.js/issues/53#issuecomment-407769548
+import GeoTIFF from 'geotiff/dist/geotiff.bundle.min.js';
+const { fromUrl, fromUrls, Pool } = GeoTIFF;
 
 import CanvasTileImageSource from '../maputil';
 import { renderData } from '../renderutils';
