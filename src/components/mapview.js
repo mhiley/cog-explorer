@@ -27,6 +27,81 @@ async function all(promises) {
   return result;
 }
 
+function scaleDiscrete(red, green, blue, redScaled, greenScaled, blueScaled) {
+  // TODO don't assume 4 classes / pass colormap from frontend params
+  // remember pixels with r,g,b all 0 are discarded
+  const redColorMap = {
+    0: 0,
+    1: 200, // impervious surface
+    2: 149, // veg
+    3: 52, // water
+  };
+  const greenColorMap = {
+    0: 0,
+    1: 200, // impervious surface
+    2: 235, // veg
+    3: 152, // water
+  };
+  const blueColorMap = {
+    0: 0,
+    1: 200, // impervious surface
+    2: 52, // veg
+    3: 235, // water
+  };
+  for (let i = 0; i < red.length; i++) {
+    redScaled[i] = redColorMap[red[i]];
+  }
+  for (let i = 0; i < green.length; i++) {
+    greenScaled[i] = greenColorMap[green[i]];
+  }
+  for (let i = 0; i < blue.length; i++) {
+    blueScaled[i] = blueColorMap[blue[i]];
+  }
+}
+
+function scaleContinuous(red, green, blue, redScaled, greenScaled, blueScaled) {
+  // TODO get these from addSceneLayer params / determined by actual raster values
+  const min = -0.2;
+  const max = 0.7;
+  /* eslint-disable eqeqeq */
+  for (let i = 0; i < red.length; i++) {
+    redScaled[i] = 255 - (((red[i] - min) / (max - min)) * 255);
+    if (red[i] < min) {
+      redScaled[i] = 255;
+    }
+    if (red[i] > max) {
+      redScaled[i] = 0;
+    }
+    if (red[i] == FILL_VALUE || red[i] == 0) {
+      // There's an issue with the readRasters fillValue implementation -
+      // sometimes it still return 0 instead of FILL_VALUE.
+      // Problem is 0 (nodata/fill) is also valid NDVI value.
+      // Note, Pixels with r,g,b all equal to zero will be discarded
+      // (see webglrenderer frag shader).
+      redScaled[i] = 0;
+    }
+  }
+  for (let i = 0; i < green.length; i++) {
+    greenScaled[i] = ((green[i] - min) / (max - min)) * 255;
+    if (green[i] < min) {
+      greenScaled[i] = 0;
+    }
+    if (green[i] > max) {
+      greenScaled[i] = 255;
+    }
+    if (green[i] == FILL_VALUE || green[i] == 0) {
+      greenScaled[i] = 0;
+    }
+  }
+  for (let i = 0; i < blue.length; i++) {
+    blueScaled[i] = 0;
+    if (blue[i] == FILL_VALUE || blue[i] == 0) {
+      blueScaled[i] = 0;
+    }
+  }
+  /* eslint-enable eqeqeq */
+}
+
 class CogAdapter {
   constructor(olMapInstance) {
     this.map = olMapInstance;
@@ -234,45 +309,15 @@ class CogAdapter {
       const redScaled = new Uint8Array(red.length);
       const greenScaled = new Uint8Array(green.length);
       const blueScaled = new Uint8Array(blue.length);
-      const min = -0.2; // TODO get these from socket.io msg
-      const max = 0.7;
-      /* eslint-disable eqeqeq */
-      for (let i = 0; i < red.length; i++) {
-        redScaled[i] = 255 - (((red[i] - min) / (max - min)) * 255);
-        if (red[i] < min) {
-          redScaled[i] = 255;
-        }
-        if (red[i] > max) {
-          redScaled[i] = 0;
-        }
-        if (red[i] == FILL_VALUE || red[i] == 0) {
-          // There's an issue with the readRasters fillValue implementation -
-          // sometimes it still return 0 instead of FILL_VALUE.
-          // Problem is 0 (nodata/fill) is also valid NDVI value.
-          // Note, Pixels with r,g,b all equal to zero will be discarded
-          // (see webglrenderer frag shader).
-          redScaled[i] = 0;
-        }
+
+      // this assumption is valid based on current data sources we currently
+      // handle, but will need a lot of generalization in the future
+      // (via passing rendering props into addSceneLayer)
+      if (red.constructor === Uint8Array) {
+        scaleDiscrete(red, green, blue, redScaled, greenScaled, blueScaled);
+      } else {
+        scaleContinuous(red, green, blue, redScaled, greenScaled, blueScaled);
       }
-      for (let i = 0; i < green.length; i++) {
-        greenScaled[i] = ((green[i] - min) / (max - min)) * 255;
-        if (green[i] < min) {
-          greenScaled[i] = 0;
-        }
-        if (green[i] > max) {
-          greenScaled[i] = 255;
-        }
-        if (green[i] == FILL_VALUE || green[i] == 0) {
-          greenScaled[i] = 0;
-        }
-      }
-      for (let i = 0; i < blue.length; i++) {
-        blueScaled[i] = 0;
-        if (blue[i] == FILL_VALUE || blue[i] == 0) {
-          blueScaled[i] = 0;
-        }
-      }
-      /* eslint-enable eqeqeq */
 
       // const [red, green, blue] = [redArr, greenArr, blueArr].map(arr => arr[0]);
       renderData(canvas, scene.pipeline, width, height, redScaled, greenScaled, blueScaled, false);
