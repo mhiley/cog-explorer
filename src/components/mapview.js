@@ -21,6 +21,7 @@ const FILL_VALUE = -999;
 
 registerProj4(proj4);
 
+/* eslint-disable no-console */
 async function all(promises) {
   const result = await Promise.all(promises);
   return result;
@@ -226,6 +227,7 @@ class CogAdapter {
 
       console.time(`rendering ${sceneId + z + x + y}`);
       const [red, green, blue] = data;
+      // console.log('data arrays: ', typeof(red), red);
 
       // mjh trying to get colorscale proof of concept to work
       // before implementing this more formally
@@ -234,40 +236,43 @@ class CogAdapter {
       const blueScaled = new Uint8Array(blue.length);
       const min = -0.2; // TODO get these from socket.io msg
       const max = 0.7;
+      /* eslint-disable eqeqeq */
       for (let i = 0; i < red.length; i++) {
         redScaled[i] = 255 - (((red[i] - min) / (max - min)) * 255);
-	    if (red[i] < min) {
-		  redScaled[i] = 255;
-		}
-	    if (red[i] > max) {
-		  redScaled[i] = 0;
-		}
-	    if (red[i] == FILL_VALUE || red[i] == 0) {
+        if (red[i] < min) {
+          redScaled[i] = 255;
+        }
+        if (red[i] > max) {
+          redScaled[i] = 0;
+        }
+        if (red[i] == FILL_VALUE || red[i] == 0) {
           // There's an issue with the readRasters fillValue implementation -
           // sometimes it still return 0 instead of FILL_VALUE.
           // Problem is 0 (nodata/fill) is also valid NDVI value.
-          // Note, Pixels with r,g,b all equal to zero will be discarded (see webglrenderer frag shader).
-		  redScaled[i] = 0;
-		}
+          // Note, Pixels with r,g,b all equal to zero will be discarded
+          // (see webglrenderer frag shader).
+          redScaled[i] = 0;
+        }
       }
       for (let i = 0; i < green.length; i++) {
         greenScaled[i] = ((green[i] - min) / (max - min)) * 255;
-	    if (green[i] < min) {
-		  greenScaled[i] = 0;
-		}
-	    if (green[i] > max) {
-		  greenScaled[i] = 255;
-		}
-	    if (green[i] == FILL_VALUE || green[i] == 0) {
-		  greenScaled[i] = 0;
-		}
+        if (green[i] < min) {
+          greenScaled[i] = 0;
+        }
+        if (green[i] > max) {
+          greenScaled[i] = 255;
+        }
+        if (green[i] == FILL_VALUE || green[i] == 0) {
+          greenScaled[i] = 0;
+        }
       }
       for (let i = 0; i < blue.length; i++) {
         blueScaled[i] = 0;
-	    if (blue[i] == FILL_VALUE || blue[i] == 0) {
-		  blueScaled[i] = 0;
-		}
+        if (blue[i] == FILL_VALUE || blue[i] == 0) {
+          blueScaled[i] = 0;
+        }
       }
+      /* eslint-enable eqeqeq */
 
       // const [red, green, blue] = [redArr, greenArr, blueArr].map(arr => arr[0]);
       renderData(canvas, scene.pipeline, width, height, redScaled, greenScaled, blueScaled, false);
@@ -298,5 +303,6 @@ class CogAdapter {
     }
   }
 }
+/* eslint-enable no-console */
 
 export default CogAdapter;
