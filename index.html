@@ -14,10 +14,11 @@
     <script src="app.bundle.js"></script>
 
     <script type="text/javascript">
+
       $(window).on('load', function () {
         var map = CogAdapter.createMap("map");
         var adapter = new CogAdapter.CogAdapter(map);
-        var sceneId = 'https://syncarto-test.s3.amazonaws.com/1ddb5280-4c8d-45dd-9738-af6c9a984e85/USER_EXP_24099d4700757ff2b577d73b6123a124_COG.TIF?AWSAccessKeyId=AKIAJSXDEN47SV3E2JTA&Expires=1555951249&Signature=4JAPeNNupf5c9p%2FU%2BWITIVDu0KE%3D';
+        var sceneId = 'https://syncarto-test.s3.amazonaws.com/74937d72-f261-48a5-a823-1b31ef1284b2/USER_EXP_c54e32234158765f3d73130f212e3b70_COG.TIF?AWSAccessKeyId=AKIAJSXDEN47SV3E2JTA&Signature=c%2Fj6pNd1guI%2BAU0Ly2WxoytqsS4%3D&Expires=1564159850';
         var samples = 1;
         var bands = new Map();
         for (var i = 0; i < samples; ++i) {

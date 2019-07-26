@@ -6,6 +6,7 @@ import { transformExtent } from 'ol/proj';
 import { register as registerProj4 } from 'ol/proj/proj4';
 import { containsCoordinate } from 'ol/extent';
 
+// NOTE you want to use this type of import for local testing:
 // import { fromUrl, fromUrls, Pool } from 'geotiff';
 // for stencil/typescript/rollup build, importing geotiff.js this way
 // avoids lots of issues.
