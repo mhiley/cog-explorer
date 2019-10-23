@@ -162,7 +162,7 @@ class CogAdapter {
     return this.tileCache[id];
   }
 
-  async addSceneLayer(scene) {
+  async addSceneLayer(scene, layerOpts = {}) {
     console.log('scene: ', scene);
     this.scenes.push(scene);
     this.sceneSources[scene.id] = {
@@ -213,6 +213,7 @@ class CogAdapter {
         tileRenderFunction: (...args) => this.renderTile(scene.id, ...args),
         attributions: scene.attribution,
       }),
+      ...layerOpts,
     });
 
     this.map.addLayer(layer);
