@@ -11,7 +11,13 @@ import { containsCoordinate } from 'ol/extent';
 // for stencil/typescript/rollup build, importing geotiff.js this way
 // avoids lots of issues.
 // inpsired by https://github.com/geotiffjs/geotiff.js/issues/53#issuecomment-407769548
-import GeoTIFF from 'geotiff/dist/geotiff.bundle.min.js';
+
+// works in stencil build, fails in react build:
+// import GeoTIFF from 'geotiff/dist/geotiff.bundle.min.js';
+
+// works in reqct build:
+const GeoTIFF = require("geotiff/dist/geotiff.bundle.min.js");
+
 const { fromUrl, fromUrls, Pool } = GeoTIFF;
 
 import CanvasTileImageSource from '../maputil';
